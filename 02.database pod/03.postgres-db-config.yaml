@@ -1,0 +1,9 @@
+# PostgreSQL StatefulSet ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgresql-db-config
+data:
+  POSTGRES_DB: planet9
+  POSTGRES_USER: dbuser
+  POSTGRES_PASSWORD: -----

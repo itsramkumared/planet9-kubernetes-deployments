@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: planet9-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: planet9
+  template:
+    metadata:
+      labels:
+        app: planet9
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: planet9
+        image: neptunesoftware/planet9
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 0
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 1Gi
+          limits:
+            cpu: 2000m
+            memory: 1Gi
+        ports:
+        - containerPort: 8080
+          name: planet9
+        env:
+        - name: DB_TYPE
+          value: "postgresql"
+        - name: DB_PSQL_DBNAME
+          value: "planet9"
+        - name: DB_PSQL_HOST
+          value: "planet9db-ext-svc"
+        - name: DB_PSQL_PORT
+          value: "5432"
+        - name: DB_PSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: dbsec
+              key: dbuser
+        - name: DB_PSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: dbsec
+              key: dbpass
+      initContainers:
+        - name: init-schema
+          image: postgresql-client
+          command: ['sh','-c','apt-get update && apt-get upgrade -y && apt-get install postgresql-client -y && export PGPASSWORD=goodearth && psql -h planet9db.cjpkgpd6mbtc.us-east-1.rds.amazonaws.com -p 5432 -d planet9 -U planet9 -w -c "CREATE SCHEMA planet9"']

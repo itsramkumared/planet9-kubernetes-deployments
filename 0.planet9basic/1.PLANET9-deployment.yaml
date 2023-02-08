@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: planet9-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: planet9
+  template:
+    metadata:
+      labels:
+        app: planet9
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: planet9
+        image: neptunesoftware/planet9
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 0
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        ports:
+        - containerPort: 8080
+          name: planet9

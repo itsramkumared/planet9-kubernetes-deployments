@@ -1,0 +1,167 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: planet9a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: planet9a
+  template:
+    metadata:
+      labels:
+        app: planet9a
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: planet9a
+        image: neptunesoftware/planet9
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 0
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 1Gi
+          limits:
+            cpu: 2000m
+            memory: 1Gi
+        ports:
+        - containerPort: 8080
+          name: planet9a
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: planet9a-svc
+spec:
+  selector:
+    app: planet9a
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 32101
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: planet9b
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: planet9b
+  template:
+    metadata:
+      labels:
+        app: planet9b
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: planet9b
+        image: neptunesoftware/planet9
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 0
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 1Gi
+          limits:
+            cpu: 2000m
+            memory: 1Gi
+        ports:
+        - containerPort: 8080
+          name: planet9b
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: planet9b-svc
+spec:
+  selector:
+    app: planet9b
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 32102
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: planet9c
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: planet9c
+  template:
+    metadata:
+      labels:
+        app: planet9c
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: planet9c
+        image: neptunesoftware/planet9
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 0
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 1Gi
+          limits:
+            cpu: 2000m
+            memory: 1Gi
+        ports:
+        - containerPort: 8080
+          name: planet9c
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: planet9c-svc
+spec:
+  selector:
+    app: planet9c
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 32103
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-planet9-service
+  annotations:
+    kubernetes.io/ingress.class: "alb"
+    alb.ingress.kubernetes.io/scheme: internet-facing
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /app1/*
+            backend:
+              serviceName: planet9a-svc
+              servicePort: 8080
+          - path: /app2/*
+            backend:
+              serviceName: planet9b-svc
+              servicePort: 8080
+          - path: /app3/*
+            backend:
+              serviceName: planet9c-svc
+              servicePort: 8080

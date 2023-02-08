@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: planet9-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: planet9
+  template:
+    metadata:
+      labels:
+        app: planet9
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: planet9
+        image: neptunesoftware/planet9
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 0
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 1Gi
+          limits:
+            cpu: 2000m
+            memory: 1Gi
+        ports:
+        - containerPort: 8080
+          name: planet9
+        volumeMounts:
+          - mountPath: "/home/planet9/customnpm"
+            name: planet9-npm-storage
+        env:
+        - name: DB_TYPE
+          value: "postgresql"
+        - name: DB_PSQL_HOST
+          value: "planet9db-ext-svc"
+        - name: DB_PSQL_PORT
+          value: "5432"
+        - name: DB_PSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: dbsec
+              key: dbuser
+        - name: DB_PSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: dbsec
+              key: dbpass
+        - name: DB_PSQL_DBNAME
+          value: "planet9"
+      volumes:
+      - name: planet9-npm-storage
+        persistentVolumeClaim:
+          claimName: efs-storage-claim

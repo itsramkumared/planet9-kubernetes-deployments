@@ -1,0 +1,3 @@
+arn:aws:iam::335956887599:policy/ALBIngressControllerIAMPolicy
+
+eksctl create iamserviceaccount --region us-east-1 --name alb-ingress-controller --namespace kube-system --cluster eks-planet9 --attach-policy-arn arn:aws:iam::335956887599:policy/ALBIngressControllerIAMPolicy --override-existing-serviceaccounts --approve
