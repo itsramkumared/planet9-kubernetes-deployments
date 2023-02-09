@@ -1,3 +1,9 @@
+Planet9 kubernetes architecture
+
+![](07.Images/Planet9%20architecture.png)
+
+
+
 ***Create Cluster***
 
   
